@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pluribus</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Cormorant+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAF8F5;--warm:#F3EFE8;--msg:#EEEAE3;
+  --bdr:#DDD8CE;--bdr-lt:#E8E4DC;
+  --st:#4A4238;--st-md:#5A5248;--st-lt:#6B6358;
+  --st-fd:#9A9488;--st-gh:#B8B2A8;
+  --ch:#3A342C;--ch-dp:#2A2520;
+  --usr:#E8E2D8;--acc:#8B6B4A;--wh:#FDFCFA;
+  --grn:#5D9B4A;--red:#C4553A;--amber:#B8860B;
+}
+body{font-family:'Cormorant Garamond','Georgia',serif;background:var(--bg);color:var(--st);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+
+header{padding:16px 24px 12px;border-bottom:1px solid var(--bdr-lt);display:flex;align-items:baseline;justify-content:space-between;background:var(--wh);flex-shrink:0}
+.logo{font-family:'Cormorant SC',serif;font-size:22px;font-weight:600;color:var(--ch-dp);letter-spacing:8px;text-transform:uppercase;text-shadow:1px 1px 0 var(--warm)}
+.sub{font-family:'Cormorant SC',serif;font-size:9px;color:var(--st-gh);letter-spacing:5px;text-transform:uppercase;margin-top:2px}
+.hdr-r{display:flex;align-items:center;gap:12px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--st-gh);transition:background 0.3s}
+.dot.on{background:var(--grn)}.dot.busy{background:var(--amber);animation:pulse 1.5s infinite}.dot.off{background:var(--red)}
+.st-txt{font-size:12px;color:var(--st-gh)}
+
+#msgs{flex:1;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:18px}
+.msg{max-width:80%;display:flex;flex-direction:column;gap:3px}
+.msg.u{align-self:flex-end}.msg.c{align-self:flex-start}.msg.s{align-self:center}
+.msg-lbl{font-family:'Cormorant SC',serif;font-size:10px;font-weight:600;color:var(--st-gh);letter-spacing:4px;text-transform:uppercase}
+.msg-body{font-size:16px;line-height:1.7;font-weight:400;letter-spacing:0.2px;white-space:pre-wrap;word-wrap:break-word}
+.msg.c .msg-body{border-left:2px solid var(--bdr);padding:2px 0 2px 20px;color:var(--st-md)}
+.msg.u .msg-body{background:var(--usr);padding:14px 20px;border-radius:2px;color:var(--ch)}
+.msg.s .msg-body{font-family:'Cormorant SC',serif;font-size:11px;color:var(--st-gh);letter-spacing:3px;padding:6px 16px;border:1px solid var(--bdr-lt);background:var(--warm)}
+.msg-time{font-size:11px;color:var(--st-gh);font-weight:300;letter-spacing:1px}
+.msg.u .msg-time{text-align:right}.msg.c .msg-time{margin-left:20px}
+
+/* Mission progress */
+.step{align-self:flex-start;border-left:2px solid var(--acc);padding:4px 0 4px 20px;font-family:'Cormorant SC',serif;font-size:11px;color:var(--acc);letter-spacing:2px;max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.step .detail{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--st-fd);letter-spacing:0;white-space:normal;margin-top:2px;font-style:italic}
+.typing{display:flex;gap:8px;align-items:center;border-left:2px solid var(--bdr);padding-left:20px;height:24px}
+.typing span{width:4px;height:4px;border-radius:50%;background:var(--st-fd);animation:fade 1.4s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+
+/* Files */
+.file-list{align-self:flex-start;border-left:2px solid var(--grn);padding:8px 0 8px 20px}
+.file-item{display:inline-block;font-size:13px;color:var(--acc);cursor:pointer;padding:3px 10px;margin:2px 4px 2px 0;border:1px solid var(--bdr-lt);text-decoration:none;transition:all 0.15s}
+.file-item:hover{background:var(--warm);color:var(--ch)}
+
+/* Footer */
+.footer{padding:5px 24px;display:flex;justify-content:center;gap:20px;font-family:'Cormorant SC',serif;font-size:10px;color:var(--st-gh);letter-spacing:3px;flex-shrink:0}
+.sep{color:var(--bdr-lt)}
+
+/* Input area */
+.input-wrap{padding:12px 20px 18px;border-top:1px solid var(--bdr-lt);display:flex;gap:10px;align-items:center;background:var(--wh);flex-shrink:0}
+#input{flex:1;background:var(--bg);border:1px solid var(--bdr-lt);border-radius:2px;color:var(--ch);padding:13px 18px;font-family:'Cormorant Garamond',serif;font-size:16px;outline:none;transition:border-color 0.2s}
+#input::placeholder{color:var(--st-gh);font-style:italic}
+#input:focus{border-color:var(--acc)}
+#input:disabled{opacity:0.5}
+
+.btn{background:none;border:none;border-bottom:2px solid transparent;padding:13px 4px;font-family:'Cormorant SC',serif;font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;cursor:default;transition:all 0.2s;flex-shrink:0}
+.btn.on{color:var(--ch);border-bottom-color:var(--ch);cursor:pointer}
+.btn.on:hover{color:var(--acc);border-bottom-color:var(--acc)}
+.btn.off{color:var(--st-gh)}
+.btn.abort{color:var(--red);border-bottom-color:var(--red);cursor:pointer;display:none}
+.btn.abort:hover{opacity:0.7}
+.btn.abort.show{display:block}
+
+/* Upload */
+.upload-btn{background:none;border:1px solid var(--bdr-lt);border-radius:2px;padding:8px 10px;cursor:pointer;color:var(--st-fd);font-size:14px;transition:all 0.15s;flex-shrink:0;line-height:1}
+.upload-btn:hover{background:var(--warm);color:var(--ch)}
+#file-input{display:none}
+.upload-preview{font-size:11px;color:var(--acc);padding:2px 8px}
+
+#msgs::-webkit-scrollbar{width:4px}
+#msgs::-webkit-scrollbar-track{background:transparent}
+#msgs::-webkit-scrollbar-thumb{background:var(--bdr-lt);border-radius:10px}
+@keyframes fade{0%,100%{opacity:.2}50%{opacity:.8}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:600px){header{padding:12px 16px 10px}.logo{font-size:18px;letter-spacing:6px}#msgs{padding:18px 12px}.msg{max-width:92%}.input-wrap{padding:10px 12px 14px}.footer{gap:10px;font-size:9px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div><div class="logo">Pluribus</div><div class="sub">e pluribus unum</div></div>
+  <div class="hdr-r">
+    <div class="dot" id="dot"></div>
+    <span class="st-txt" id="stxt">Connecting</span>
+  </div>
+</header>
+
+<div id="msgs"></div>
+
+<div class="footer">
+  <span id="sm">0 missions</span><span class="sep">|</span>
+  <span id="st">0 tokens</span><span class="sep">|</span>
+  <span id="sp">—</span>
+</div>
+
+<div class="input-wrap">
+  <label class="upload-btn" for="file-input" title="Upload file">+</label>
+  <input type="file" id="file-input" multiple>
+  <input type="text" id="input" placeholder="Your orders, Commander..." disabled>
+  <span class="upload-preview" id="uprev"></span>
+  <button class="btn off" id="send">Send</button>
+  <button class="btn abort" id="abort">Abort</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const msgs = $('msgs'), input = $('input'), sendBtn = $('send'), abortBtn = $('abort');
+const dot = $('dot'), stxt = $('stxt'), fileInput = $('file-input'), uprev = $('uprev');
+let ws, busy = false, first = true, pendingFiles = [];
+
+function connect() {
+  const p = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${p}//${location.host}`);
+
+  ws.onopen = () => { dot.className='dot on'; stxt.textContent='Ready'; input.disabled=false; input.focus(); };
+  ws.onclose = () => { dot.className='dot off'; stxt.textContent='Disconnected'; input.disabled=true; setTimeout(connect,3000); };
+  ws.onmessage = e => handle(JSON.parse(e.data));
+}
+
+function handle(msg) {
+  switch(msg.type) {
+    case 'init':
+      stats(msg.data.stats);
+      if(msg.data.provider){const p=msg.data.provider;$('sp').textContent=p.precision?`${p.provider} ${p.precision}`:p.provider;}
+      if(msg.data.history?.length>0){msg.data.history.forEach(m=>addMsg(m.role==='user'?'u':'c',m.content,false));first=false;}
+      if(first){addMsg('c','Ave, Commander.\n\nI am your Centurion, powered by a 1-bit brain that runs entirely on your machine. No cloud. No API keys. No one watching.\n\nI have a browser, a code interpreter, and a file system. Upload files, give orders, and I will act.\n\nWhat would you have me do?',false);first=false;}
+      if(msg.data.running) setBusy(true);
+      break;
+    case 'message':
+      rmTyping();
+      addMsg(msg.data.role==='user'?'u':'c', msg.data.content);
+      // Don't unset busy on "executing now" or "stand by"
+      if(msg.data.role!=='user' && !msg.data.content.includes('Executing now') && !msg.data.content.includes('Stand by'))
+        if(!msg.data.content.includes('Abort requested')) setBusy(false);
+      break;
+    case 'mission.started':
+      addSys('Mission started'); showTyping(); break;
+    case 'mission.iteration':
+      rmTyping();
+      if(msg.data.phase==='thinking') showTyping();
+      else if(msg.data.phase==='acting') addStep(msg.data.tool, msg.data.reasoning);
+      break;
+    case 'mission.action':
+      rmTyping();
+      addStep(msg.data.tool, msg.data.reasoning);
+      showTyping();
+      break;
+    case 'mission.completed':
+      rmTyping();
+      addSys(msg.data.result?.success ? 'Mission complete' : 'Mission failed');
+      break;
+    case 'mission.aborted':
+      rmTyping(); addSys('Mission aborted'); setBusy(false); break;
+    case 'mission.error':
+      addStep('error', msg.data.error); break;
+    case 'mission.active':
+      if(!msg.data.running) setBusy(false); break;
+    case 'mission.files':
+      if(msg.data.files?.length) addFiles(msg.data.files); break;
+    case 'stats':
+      stats(msg.data); break;
+  }
+}
+
+function addMsg(role, content, scroll=true) {
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  let h = '';
+  if(role==='c' && msgs.querySelectorAll('.msg.c').length===0) h += '<div class="msg-lbl">Centurion</div>';
+  h += `<div class="msg-body">${esc(content)}</div><div class="msg-time">${time()}</div>`;
+  d.innerHTML = h; msgs.appendChild(d);
+  if(scroll) sb();
+}
+
+function addSys(t) {
+  const d = document.createElement('div');
+  d.className = 'msg s'; d.innerHTML = `<div class="msg-body">${esc(t)}</div>`;
+  msgs.appendChild(d); sb();
+}
+
+function addStep(tool, reasoning) {
+  const d = document.createElement('div');
+  d.className = 'step';
+  const name = (tool||'').replace(/_/g,' ');
+  d.innerHTML = name + (reasoning ? `<div class="detail">${esc(reasoning).slice(0,120)}</div>` : '');
+  msgs.appendChild(d); sb();
+}
+
+function addFiles(files) {
+  const d = document.createElement('div');
+  d.className = 'file-list';
+  d.innerHTML = files.map(f => `<a class="file-item" href="/api/files/${encodeURIComponent(f)}" download="${esc(f)}">${esc(f)}</a>`).join('');
+  msgs.appendChild(d); sb();
+}
+
+function showTyping() {
+  if(msgs.querySelector('.typing')) return;
+  const d = document.createElement('div');
+  d.className = 'typing'; d.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(d); sb();
+}
+
+function rmTyping() { msgs.querySelectorAll('.typing').forEach(e=>e.remove()); }
+
+function setBusy(b) {
+  busy = b;
+  dot.className = b ? 'dot busy' : 'dot on';
+  stxt.textContent = b ? 'Executing' : 'Ready';
+  input.disabled = b;
+  abortBtn.className = b ? 'btn abort show' : 'btn abort';
+  sendBtn.style.display = b ? 'none' : '';
+  updSend();
+  if(!b) input.focus();
+}
+
+function updSend() { sendBtn.className = (input.value.trim()&&!busy) ? 'btn on' : 'btn off'; }
+
+function stats(s) {
+  if(!s) return;
+  $('sm').textContent = `${s.totalMissions||0} missions`;
+  $('st').textContent = `${(s.totalTokens||0).toLocaleString()} tokens`;
+}
+
+async function doSend() {
+  const txt = input.value.trim();
+  if(!txt||busy) return;
+  input.value = ''; updSend();
+
+  // Upload pending files first
+  const fileInfo = [];
+  for(const f of pendingFiles) {
+    const b64 = await fileToBase64(f);
+    try {
+      const r = await fetch('/api/upload', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ filename: f.name, content: b64 }),
+      });
+      const j = await r.json();
+      if(j.success) fileInfo.push({ name: j.filename, size: j.size });
+    } catch(e) { console.error('Upload failed:', e); }
+  }
+  pendingFiles = []; uprev.textContent = '';
+
+  ws.send(JSON.stringify({ type: 'message', content: txt, files: fileInfo }));
+  setBusy(true); showTyping();
+}
+
+function doAbort() { ws.send(JSON.stringify({ type: 'abort' })); }
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+fileInput.addEventListener('change', () => {
+  pendingFiles = Array.from(fileInput.files);
+  uprev.textContent = pendingFiles.length > 0
+    ? pendingFiles.map(f=>f.name).join(', ')
+    : '';
+  fileInput.value = '';
+});
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function time(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function sb(){requestAnimationFrame(()=>msgs.scrollTop=msgs.scrollHeight);}
+
+input.addEventListener('input', updSend);
+input.addEventListener('keydown', e=>{ if(e.key==='Enter') doSend(); });
+sendBtn.addEventListener('click', doSend);
+abortBtn.addEventListener('click', doAbort);
+
+connect();
+</script>
+</body>
+</html>
