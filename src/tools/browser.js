@@ -152,15 +152,33 @@ export class BrowserTool {
     const nav = await this.navigate(url);
     if (!nav.success) return nav;
 
-    const links = await this.page.evaluate(() =>
-      Array.from(document.querySelectorAll('div.g a')).map(a => {
-        const title = a.querySelector('h3')?.innerText || '';
-        const href = a.href;
-        const snippet = a.closest('div.g')?.querySelector('[data-sncf]')?.innerText ||
-                        a.closest('div.g')?.querySelector('.VwiC3b')?.innerText || '';
-        return { title, href, snippet: snippet.slice(0, 200) };
-      }).filter(l => l.title && l.href.startsWith('http')).slice(0, 10)
-    );
+    const links = await this.page.evaluate(() => {
+      const results = [];
+      const selectors = ['div.g a h3', 'a h3', '[data-header-feature] h3', 'h3.LC20lb'];
+      for (const sel of selectors) {
+        const els = document.querySelectorAll(sel);
+        if (els.length > 0) {
+          els.forEach(h3 => {
+            const a = h3.closest('a');
+            if (a && a.href.startsWith('http')) {
+              const snippet = a.closest('[data-sokoban-container]')?.querySelector('[data-sncf]')?.innerText ||
+                              a.closest('div')?.parentElement?.querySelector('[style*="-webkit-line-clamp"]')?.innerText || '';
+              results.push({ title: h3.innerText, href: a.href, snippet: snippet.slice(0, 200) });
+            }
+          });
+          break;
+        }
+      }
+      if (results.length === 0) {
+        document.querySelectorAll('a').forEach(a => {
+          const text = a.innerText.trim();
+          if (text.length > 20 && a.href.startsWith('http') && !a.href.includes('google.com')) {
+            results.push({ title: text.slice(0, 100), href: a.href, snippet: '' });
+          }
+        });
+      }
+      return results.slice(0, 10);
+    });
 
     return { success: true, query, results: links };
   }

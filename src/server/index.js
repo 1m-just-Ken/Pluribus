@@ -77,7 +77,10 @@ async function main() {
     wss.clients.forEach(c => { if (c.readyState === 1) c.send(msg); });
   };
 
-  const centurion = new CenturionLoop(llm, memory, (type, data) => broadcast(type, data));
+  const centurion = new CenturionLoop(llm, memory, (type, data) => {
+    console.log(`  [${type}]`, JSON.stringify(data).slice(0, 200));
+    broadcast(type, data);
+});
 
   // ─── WEBSOCKET ──────────────────────────────────────────
 

@@ -42,7 +42,8 @@ CRITICAL RULES:
 3. Use browser_search for information. Use code_execute for computation.
 4. Use file_write to save deliverables the user can download.
 5. When done, use "complete" with a clear summary of what was accomplished.
-6. Keep reasoning to one sentence. Act, don't explain.`;
+6. Keep reasoning to one sentence. Act, don't explain.
+7. NEVER fabricate, invent, or generate fake data. If a tool returns empty results, report that honestly. Do not use code_execute to create made-up information.`;
 
 export class CenturionLoop {
   constructor(llm, memory, emitEvent) {
